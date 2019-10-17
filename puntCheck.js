@@ -8,10 +8,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,9 +43,9 @@
 
             // How long in between !punt should we reset the timer
             const punt_timeout_secounds = 300;
-            
+
             // How to split arrays
-            const arr_split = ",";    
+            const arr_split = ",";
 
             // Which people have !punted this cycle
             var people = $.inidb.GetString("settings", "", "punt_people");
@@ -70,6 +70,10 @@
                 $.inidb.SetString("settings", "", "punt_time", now.toString());
                 counter = 0;
                 people = "";
+            } else if (counter == 0) {
+                // If we just had a punt, we need to wait the full time out
+                // before we can start a new punt
+                return;
             }
 
             // If this user is already involved in the punt, don't re-count them

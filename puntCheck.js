@@ -24,8 +24,8 @@
  /**
   * puntCheck.js
   *
-  * Implements '!punt' which can be used by chat to alert the streamer they made
-  * a mistake.
+  * Implements '!punt' and '!notapunt' which can be used by chat to
+  * alert the streamer they made a mistake.
   */
 
 (function() {
@@ -37,16 +37,19 @@
             command = event.getCommand(),
             args = event.getArgs();
 
+        // How many people have to !punt to trigger (2 minimum)
+        const how_many_to_punt = 4;
+
+        // How long in between !punt should we reset the timer
+        const punt_timeout_secounds = 300;
+
+        // How to split arrays
+        const arr_split = ",";
+
+        // Current execution time
+        const now = new Date();
+
         if (command.equalsIgnoreCase("punt")) {
-            // How many people have to !punt to trigger
-            const how_many_to_punt = 4;
-
-            // How long in between !punt should we reset the timer
-            const punt_timeout_secounds = 300;
-
-            // How to split arrays
-            const arr_split = ",";
-
             // Which people have !punted this cycle
             var people = $.inidb.GetString("settings", "", "punt_people");
 
@@ -59,9 +62,6 @@
             // Trigger time of last starting !punt
             var punt_time = new Date($.inidb.GetString("settings", "", "punt_time"));
 
-            // Current execution time
-            var now = new Date();
-
             // Time between last start of !punt and now
             var time_since_punt_seconds = Math.floor((now - punt_time)/1000);
 
@@ -71,9 +71,11 @@
                 counter = 0;
                 people = "";
             } else if (counter == 0) {
-                // If we just had a punt, we need to wait the full time out
-                // before we can start a new punt
-                return;
+                // Unless a moderator calls for a punt, if we just had a punt,
+                // we need to wait the full time out before we can start a new punt
+                if (!$.isMod(sender)) {
+                   return;
+                }
             }
 
             // If this user is already involved in the punt, don't re-count them
@@ -83,7 +85,7 @@
 
             if (counter == 0) {
                 // Start the punt sequence!
-                $.say("Uh-oh... did the streamer punt? Type !punt to confirm");
+                $.say("Chat thinks " + $.channelName + " punted, !punt if you agree");
 
                 people = people.concat(sender + arr_split);
                 counter += 1;
@@ -97,11 +99,31 @@
                 total_punts += 1;
                 $.inidb.SetLong("settings", "", "punt_total", total_punts);
 
-                $.say("Darn, the streamer DID punt! Lifetime punts: " + total_punts);
+                $.say("Who knew, chat was right! " + $.channelName + " did punt! Lifetime punts: " + total_punts);
             }
 
             $.inidb.SetString("settings", "", "punt_people", people);
             $.inidb.SetLong("settings", "", "punt_counter", counter);
+        }
+
+        if (command.equalsIgnoreCase("notapunt")) {
+            // Trigger time of last starting !punt
+            var punt_time = new Date($.inidb.GetString("settings", "", "punt_time"));
+
+            // How many punts has streamer made in lifetime
+            var total_punts = $.inidb.GetLong("settings", "", "punt_total");
+
+            // Time between last start of !punt and now
+            var time_since_punt_seconds = Math.floor((now - punt_time)/1000);
+
+            if (time_since_punt_seconds <= 2 * punt_timeout_secounds) {
+                $.say("Just kidding, that clearly wasn't a punt! Chat's never right Kappa Lifetime punts: " + total_punts);
+
+                total_punts -= 1;
+                $.inidb.SetLong("settings", "", "punt_total", total_punts);
+            } else {
+                $.say("No punts recently happened to undo");
+            }
         }
     });
 
@@ -110,7 +132,8 @@
      */
     $.bind('initReady', function() {
         if ($.bot.isModuleEnabled('./custom/puntCheck.js')) {
-            $.registerChatCommand('./custom/puntCheck.js', 'punt', 7);
+            $.registerChatCommand('./custom/puntCheck.js', 'punt', 7); // All users
+            $.registerChatCommand('./custom/puntCheck.js', 'notapunt', 2); // Mod only
         }
     });
 })();

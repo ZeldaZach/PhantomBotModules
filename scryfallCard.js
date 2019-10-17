@@ -40,69 +40,6 @@
 
         const scryfall_api = "https://api.scryfall.com/cards/named?fuzzy=";
 
-        if (command.equalsIgnoreCase("punt")) {
-            // How many people have to !punt to trigger
-            const how_many_to_punt = 4;
-
-            // How long in between !punt should we reset the timer
-            const punt_timeout_secounds = 300;
-
-            // How to split arrays
-            const arr_split = ",";
-
-            // Which people have !punted this cycle
-            var people = $.inidb.GetString("settings", "", "punt_people");
-
-            // How many !punters this cycle
-            var counter = $.inidb.GetLong("settings", "", "punt_counter");
-
-            // How many punts has streamer made in lifetime
-            var total_punts = $.inidb.GetLong("settings", "", "punt_total");
-
-            // Trigger time of last starting !punt
-            var punt_time = new Date($.inidb.GetString("settings", "", "punt_time"));
-
-            // Current execution time
-            var now = new Date();
-
-            // Time between last start of !punt and now
-            var time_since_punt_seconds = Math.floor((now - punt_time)/1000);
-
-            // If !punt timeout occurred, reset the last punt time
-            if (time_since_punt_seconds >= punt_timeout_secounds) {
-                $.inidb.SetString("settings", "", "punt_time", now.toString());
-                counter = 0;
-                people = "";
-            }
-
-            // If this user is already involved in the punt, don't re-count them
-            if (false && people.includes(sender + arr_split)) {
-                return;
-            }
-
-            if (counter == 0) {
-                // Start the punt sequence!
-                $.say("Uh-oh... did the streamer punt? Type !punt to confirm");
-
-                people = people.concat(sender + arr_split);
-                counter += 1;
-            } else if (counter < how_many_to_punt - 1) {
-                people = people.concat(sender + arr_split);
-                counter += 1;
-            } else {
-                // We hit our goal! It is indeed a punt by the streamer
-                counter = 0;
-                people = "";
-                total_punts += 1;
-                $.inidb.SetLong("settings", "", "punt_total", total_punts);
-
-                $.say("Darn, the streamer DID punt! Lifetime punts: " + total_punts);
-            }
-
-            $.inidb.SetString("settings", "", "punt_people", people);
-            $.inidb.SetLong("settings", "", "punt_counter", counter);
-        }
-
         if (command.equalsIgnoreCase("card")) {
             const url = scryfall_api.concat(encodeURIComponent(card_name));
             const data = JSON.parse($.customAPI.get(url).content);
@@ -139,8 +76,7 @@
      */
     $.bind('initReady', function() {
         if ($.bot.isModuleEnabled('./custom/scryfallCard.js')) {
-            $.registerChatCommand('./custom/scryfallCard.js', 'card', 7);
-            $.registerChatCommand('./custom/scryfallCard.js', 'punt', 7);
+            $.registerChatCommand('./custom/scryfallCard.js', 'card', 7); // All users
         }
     });
 })();

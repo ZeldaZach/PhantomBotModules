@@ -59,7 +59,10 @@
             if (data.card_faces) {
                 var response = data.name + " | ";
                 for (index = 0; index < data.card_faces.length; index++) {
-                    response += data.card_faces[index].oracle_text + " // ";
+                    response += data.card_faces[index].oracle_text;
+                    if (index < data.card_faces.length - 1) {
+                        response += " // ";
+                    }
                 }
                 $.say(response.substring(0, 500));
                 return;

@@ -36,17 +36,30 @@
         var sender = event.getSender(),
             command = event.getCommand(),
             args = event.getArgs(),
-            card_name = args.join(" ");
+            card_name = args.join(" ").trim();
 
         const scryfall_api = "https://api.scryfall.com/cards/named?fuzzy=";
 
         if (command.equalsIgnoreCase("card")) {
+            if (card_name.length == 0 || $.isBot(sender)) {
+                return;
+            }
+
             const url = scryfall_api.concat(encodeURIComponent(card_name));
             const data = JSON.parse($.customAPI.get(url).content);
 
             // Error returned by Scryfall
             if (data.status === 404) {
                 $.say($.whisperPrefix(sender) + data.details);
+                return;
+            }
+
+            if (data.card_faces) {
+                var response = data.name + "|";
+                for (index = 0; index < data.card_faces.length; index++) {
+                    response += data.card_faces[index].oracle_text + " // ";
+                }
+                $.say(response.substring(0, 500));
                 return;
             }
 
@@ -66,7 +79,7 @@
                 + data.type_line + extra_component + " | "
                 + data.oracle_text;
 
-            $.say(response);
+            $.say(response.substring(0, 500));
             return;
         }
     });

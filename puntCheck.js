@@ -38,7 +38,7 @@
             args = event.getArgs();
 
         // How many people have to !punt to trigger (2 minimum)
-        const how_many_to_punt = 4;
+        const how_many_to_punt = 3;
 
         // How long in between !punt should we reset the timer
         const punt_timeout_secounds = 300;

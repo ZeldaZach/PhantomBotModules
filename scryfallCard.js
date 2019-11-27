@@ -54,6 +54,8 @@
                 return;
             }
 
+            // Split cards are annoying, so we will only show
+            // Rules text for them to save space
             if (data.card_faces) {
                 var response = data.name + "|";
                 for (index = 0; index < data.card_faces.length; index++) {

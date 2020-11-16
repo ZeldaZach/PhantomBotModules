@@ -61,7 +61,7 @@
                 $.setIniDbString("streamRecords", "currentRecord", newRecord);
             }
         }
-    }
+    });
 
     /**
      * @event initReady
